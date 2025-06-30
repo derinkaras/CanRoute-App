@@ -37,7 +37,7 @@ const dashboard = () => {
             {showSideBar && (
                 <Sidebar setShowSideBar={setShowSideBar} />
             )}
-            <View className="flex-row mx-5 mt-8 items-center relative mt-20">
+            <View className="flex-row mx-5 items-center relative mt-20">
                 <TouchableOpacity
                     className="w-12 h-12 bg-gray-300 rounded-full overflow-hidden justify-center items-center z-0"
                     onPress={() => setShowSideBar(!showSideBar)}
