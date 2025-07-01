@@ -39,9 +39,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
         const persistUser = async () => {
             const storedUser = await AsyncStorage.getItem("user");
             const parsedUser = storedUser ? JSON.parse(storedUser) : null;
-
             const storedToken = await AsyncStorage.getItem("token");
-
             setUser(parsedUser);
             setToken(storedToken);
         };

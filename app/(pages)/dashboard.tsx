@@ -1,13 +1,16 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, SafeAreaView, Image, Pressable, Button, TouchableOpacity} from 'react-native';
 import icons from "@/app/constants/icons";
 import {useRouter} from "expo-router";
 import Sidebar from "@/app/components/Sidebar";
+import TodaysRoute from "@/app/components/TodaysRoute";
 
 const dashboard = () => {
     const router = useRouter();
     const [showSideBar, setShowSideBar] = useState(false);
-    const currentDate = new Date();
+    const [moveSliderUp, setMoveSliderUp] = useState(false);
+    const [currentDate, setCurrentDate] = useState(new Date());
+
     const weekdayMap = {
         "0": "Sunday",
         "1": "Monday",
@@ -31,6 +34,12 @@ const dashboard = () => {
         "10": "November",
         "11": "December",
     }
+    useEffect(() => {
+        const timer = setInterval(()=>{
+            setCurrentDate(new Date());
+        }, 60000)
+        return () => clearInterval(timer)
+    }, [])
 
     return (
         <View className="flex flex-1 bg-white">
@@ -62,11 +71,33 @@ const dashboard = () => {
                     </View>
                 </View>
             </View>
-            <View className="flex-1"></View>
-            <TouchableOpacity
-                className="w-full h-32 bg-lightBlue focus:bg-darkBlue"
-            >
-            </TouchableOpacity>
+            <View className="flex-1">
+            </View>
+            {moveSliderUp ? (
+                <View className="absolute inset-0">
+                    <Pressable
+                        className="flex-1"
+                        onPress={() => setMoveSliderUp(!moveSliderUp)}
+                    />
+                    <View
+                        className="w-full h-1/2 bg-lightBlue absolute bottom-0 left-0 right-0 px-6"
+                    >
+                        <Text className="text-3xl font-semibold text-white text-center mt-6">Today's Route</Text>
+                        <TodaysRoute date={weekdayMap[currentDate.getDay().toString() as keyof typeof weekdayMap]}/>
+                    </View>
+                </View>
+            ) : (
+                <TouchableOpacity
+                    className={"w-full h-32 bg-lightBlue absolute bottom-0 left-0 right-0"}
+                    onPress={() => {
+                        setMoveSliderUp(!moveSliderUp);
+                    }}
+                >
+                    <Text className="text-3xl font-semibold text-white text-center mt-6">Today's Route</Text>
+
+                </TouchableOpacity>
+            )
+            }
 
         </View>
 
