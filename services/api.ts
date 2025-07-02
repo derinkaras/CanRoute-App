@@ -34,3 +34,120 @@ export const getUserCansForDay = async (user: Record<string, any> | null, date: 
     }
 }
 
+interface serviceDataType {
+    canId: Number,
+    userId: Number,
+    weekOf: Date,
+    status: String,
+    servicedAt: Date,
+    illegalDumping: Boolean,
+    notes?: String,
+}
+
+export const addUserServiceLog = async (serviceData: serviceDataType) => {
+    try {
+        const storedToken = await AsyncStorage.getItem('token');
+        const response = await fetch("https://canroute.onrender.com/api/v1/serviceLogs", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${storedToken}`
+            },
+            body: JSON.stringify({
+                ...serviceData,
+            })
+        })
+        const result = await response.json()
+        return result.data
+    } catch (error) {
+        console.error(error);
+        return []
+    }
+}
+
+export const updateUserServiceLog = async (
+    serviceData: serviceDataType,
+    canId: string,
+    userId: string,
+    weekOf: Date
+    ) => {
+    try {
+        const storedToken = await AsyncStorage.getItem('token');
+        const isoWeekOf = weekOf.toISOString()
+        const response = await fetch(`https://canroute.onrender.com/api/v1/serviceLogs/${userId}/${canId}/${isoWeekOf}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${storedToken}`
+            },
+            body: JSON.stringify({
+                ...serviceData,
+            })
+        })
+        const result = await response.json()
+        return result.data
+    } catch (error) {
+        console.error(error);
+        return []
+    }
+}
+
+export const getUserServiceLogForCanAndWeek = async (
+    canId: string,
+    userId: string,
+    weekOf: Date
+) => {
+    try {
+        const storedToken = await AsyncStorage.getItem('token');
+        const isoWeekOf = weekOf.toISOString();
+
+        const url = `https://canroute.onrender.com/api/v1/serviceLogs/specific/${userId}/${canId}/${isoWeekOf}`;
+
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${storedToken}`,
+            },
+        });
+
+
+        const json = await response.json();
+        return json.data;
+
+    } catch (error) {
+        console.error("Fetch error:", error);
+        return [];
+    }
+};
+
+
+export const getUserServiceLogsForAllCansOfWeek = async (
+    userId: string,
+    weekOf: Date
+) => {
+    try {
+        const storedToken = await AsyncStorage.getItem('token');
+        const isoWeekOf = weekOf.toISOString();
+
+        const url = `https://canroute.onrender.com/api/v1/serviceLogs/specific/${userId}/${isoWeekOf}`;
+
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${storedToken}`,
+            },
+        });
+
+        const json = await response.json();
+        return json.data;
+
+    } catch (error) {
+        console.error("Fetch error:", error);
+        return [];
+    }
+};
+
+
+

@@ -4,6 +4,8 @@ import arrowLeft from "../assets/icons/arrow-left-solid.png"
 import mail from "../assets/icons/envelope-solid.png"
 import lock from "../assets/icons/lock-solid.png"
 import hashtag from "../assets/icons/hashtag-solid.png"
+import trash from "../assets/icons/trash-solid.png"
+import route from "../assets/icons/route-solid.png"
 
 const icons = {
     bars,
@@ -11,7 +13,9 @@ const icons = {
     arrowLeft,
     mail,
     lock,
-    hashtag
+    hashtag,
+    trash,
+    route
 }
 
 export default icons

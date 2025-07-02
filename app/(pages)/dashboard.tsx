@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, SafeAreaView, Image, Pressable, Button, TouchableOpacity} from 'react-native';
+import {View, Text, SafeAreaView, Image, Pressable, Button, TouchableOpacity, ScrollView} from 'react-native';
 import icons from "@/app/constants/icons";
 import {useRouter} from "expo-router";
 import Sidebar from "@/app/components/Sidebar";
@@ -71,24 +71,25 @@ const dashboard = () => {
                     </View>
                 </View>
             </View>
+
             <View className="flex-1">
+
             </View>
             {moveSliderUp ? (
-                <View className="absolute inset-0">
+                <View className="absolute inset-0 transition-transform duration-300">
                     <Pressable
                         className="flex-1"
                         onPress={() => setMoveSliderUp(!moveSliderUp)}
                     />
                     <View
-                        className="w-full h-1/2 bg-lightBlue absolute bottom-0 left-0 right-0 px-6"
+                        className="w-full h-1/2 bg-lightBlue absolute bottom-0 left-0 right-0"
                     >
-                        <Text className="text-3xl font-semibold text-white text-center mt-6">Today's Route</Text>
                         <TodaysRoute date={weekdayMap[currentDate.getDay().toString() as keyof typeof weekdayMap]}/>
                     </View>
                 </View>
             ) : (
                 <TouchableOpacity
-                    className={"w-full h-32 bg-lightBlue absolute bottom-0 left-0 right-0"}
+                    className={"w-full h-32 bg-lightBlue absolute bottom-0 left-0 right-0 transition-transform duration-300"}
                     onPress={() => {
                         setMoveSliderUp(!moveSliderUp);
                     }}
