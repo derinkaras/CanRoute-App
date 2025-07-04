@@ -11,3 +11,13 @@ export const getWeekOf = (date: Date) => {
 
     return monday;
 };
+
+
+export const getStatusColor = (status: string) => {
+    switch (status) {
+        case 'serviced': return 'bg-green-600';
+        case 'not_needed': return 'bg-orange-500';
+        case 'unserviced':
+        default: return 'bg-red-500';
+    }
+};

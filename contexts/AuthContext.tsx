@@ -4,6 +4,7 @@ import Toast from "react-native-toast-message";
 import {useRouter} from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import asyncStorage from "@react-native-async-storage/async-storage/src/AsyncStorage";
+import {clearAsyncStorageExcept} from "@/services/cache";
 
 
 // Basically the type of the value dict we're passing in AuthContext.Provider
@@ -44,9 +45,8 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
             setToken(storedToken);
         };
         persistUser();
+        clearAsyncStorageExcept(["user", "token"])
     }, []);
-
-
 
     const signup = async (name: string, email: string, password: string, userPayrollNumber: Number) => {
         try {

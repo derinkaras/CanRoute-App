@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {addToCache, getFromCache} from "@/services/cache";
 
 // For the useFetch hook to work with these make sure you're always returning the actual data
 
@@ -25,9 +26,15 @@ export const getUserCans = async (user: Record<string, any> | null) => {
 
 export const getUserCansForDay = async (user: Record<string, any> | null, date: string) => {
     try {
-        const allCans = await getUserCans(user);
-        const cansForDay = allCans.filter((can: { assignedDay: any; }) => can.assignedDay.toLowerCase() === date.toLowerCase());
-        return cansForDay;
+        const cache = await getFromCache(`${user?._id}-${date}-cans`);
+        if (cache) {
+            return cache
+        } else {
+            const allCans = await getUserCans(user);
+            const cansForDay = allCans.filter((can: { assignedDay: any; }) => can.assignedDay.toLowerCase() === date.toLowerCase());
+            await addToCache(`${user?._id}-${date}-cans`, cansForDay);
+            return cansForDay;
+        }
     } catch (error) {
         console.error(error);
         return []
@@ -40,6 +47,7 @@ interface serviceDataType {
     weekOf: Date,
     status: String,
     servicedAt: Date,
+    servicedDate: String,
     illegalDumping: Boolean,
     notes?: String,
 }
@@ -148,6 +156,8 @@ export const getUserServiceLogsForAllCansOfWeek = async (
         return [];
     }
 };
+
+
 
 
 

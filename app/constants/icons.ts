@@ -6,7 +6,7 @@ import lock from "../assets/icons/lock-solid.png"
 import hashtag from "../assets/icons/hashtag-solid.png"
 import trash from "../assets/icons/trash-solid.png"
 import route from "../assets/icons/route-solid.png"
-
+import check from "../assets/icons/square-check-solid.png"
 const icons = {
     bars,
     user,
@@ -15,7 +15,8 @@ const icons = {
     lock,
     hashtag,
     trash,
-    route
+    route,
+    check
 }
 
 export default icons

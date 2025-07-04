@@ -3,6 +3,7 @@ import '../globals.css'
 import {useState} from "react";
 import Toast, { BaseToast, ErrorToast, BaseToastProps } from 'react-native-toast-message';
 import {AuthProvider} from "@/contexts/AuthContext";
+import {ServiceLogProvider} from "@/contexts/ServiceLogContext";
 
 
 const toastConfig = {
@@ -73,20 +74,22 @@ export default function RootLayout() {
     return (
         <>
             <AuthProvider>
-                <Stack>
-                    <Stack.Screen
-                        name="(pages)"
-                        options={{
-                            headerShown: false,
-                        }}
-                    />
-                    <Stack.Screen
-                        name="(onboarding)"
-                        options={{
-                            headerShown: false,
-                        }}
-                    />
-                </Stack>
+                <ServiceLogProvider>
+                    <Stack>
+                        <Stack.Screen
+                            name="(pages)"
+                            options={{
+                                headerShown: false,
+                            }}
+                        />
+                        <Stack.Screen
+                            name="(onboarding)"
+                            options={{
+                                headerShown: false,
+                            }}
+                        />
+                    </Stack>
+                </ServiceLogProvider>
             </AuthProvider>
             <Toast
                 position="top"

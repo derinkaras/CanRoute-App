@@ -15,23 +15,19 @@ import {
     getUserServiceLogForCanAndWeek,
     updateUserServiceLog
 } from "@/services/api";
-import {getWeekOf} from "@/services/utils";
+import {getStatusColor, getWeekOf} from "@/services/utils";
+import {useServiceLog} from "@/contexts/ServiceLogContext";
+import {addToCache} from "@/services/cache";
 
-const getStatusColor = (status: string) => {
-    switch (status) {
-        case 'serviced': return 'bg-green-600';
-        case 'not_needed': return 'bg-orange-500';
-        case 'unserviced':
-        default: return 'bg-red-500';
-    }
-};
 
-interface serviceDataType {
-    canId: number;
-    userId: number;
-    weekOf: Date;
-    status: string;
+export interface ServiceLog {
+    _id?: string;
+    canId: string;
+    userId: string;
+    weekOf: Date | string; // Accept either, convert before sending
+    status: string
     servicedAt: Date;
+    servicedDate: string
     illegalDumping: boolean;
     notes?: string;
 }
@@ -42,39 +38,78 @@ const CanModal = ({
                       can,
                       user
                   }: any) => {
+    const [confrim, setConfrim] = useState(false);
     const [currentCanServiceStatus, setCurrentCanServiceStatus] = useState("unserviced");
     const [illegalDumping, setIllegalDumping] = useState(false);
     // @ts-ignore
-    const [serviceData, setServiceData] = useState<serviceDataType>({});
+    const { serviceLogsOfWeek, setServiceLogsOfWeek } = useServiceLog();
+    // @ts-ignore
+    const [serviceData, setServiceData] = useState<ServiceLog>({});
 
     useEffect(() => {
-        if (user && can) {
-            setServiceData({
+        if (serviceLogsOfWeek && can) {
+            // The date makes sure if a can is serviced twice this week i.e the second time + it gets the can which was serviced today
+            const specificCanService = serviceLogsOfWeek.find(log => (log.canId === can._id) && (log.servicedDate === new Date().toISOString().split("T")[0]) );
+
+            if (specificCanService) {
+                setServiceData(specificCanService);
+                setCurrentCanServiceStatus(specificCanService.status);
+                setIllegalDumping(specificCanService.illegalDumping);
+            } else {
+                // @ts-ignore
+                setServiceData({});
+                setCurrentCanServiceStatus("unserviced");
+                setIllegalDumping(false);
+            }
+        }
+    }, [serviceLogsOfWeek, can]);
+
+    const confirmServiceLog = async () => {
+        const todayDate = new Date().toISOString().split("T")[0];
+        const logExists = serviceLogsOfWeek.find(log => (log.canId === can._id) && (log.servicedDate === todayDate));
+
+        if (logExists) {
+            const newServiceData = {
+                ...logExists,
+                status: currentCanServiceStatus,
+                illegalDumping: illegalDumping
+            };
+
+            // @ts-ignore
+            await updateUserServiceLog(newServiceData, can._id, user._id, getWeekOf(new Date()));
+
+            const removedServiceLogsOfWeek = serviceLogsOfWeek.filter(log => {
+                if ( (log.canId === can._id) && (log.servicedDate === todayDate) ) return false
+                return true;
+            })
+
+            const updatedLogs = [
+                ...removedServiceLogsOfWeek,
+                newServiceData
+            ]
+
+            // @ts-ignore
+            setServiceLogsOfWeek(updatedLogs);
+            await addToCache(`${user._id}-serviceLogs-${getWeekOf(new Date())}`, updatedLogs);
+
+        } else {
+            const newServiceData = {
                 canId: can._id,
                 userId: user._id,
                 weekOf: getWeekOf(new Date()),
                 status: currentCanServiceStatus,
-                illegalDumping: illegalDumping,
                 servicedAt: new Date(),
-            });
-        }
-    }, [currentCanServiceStatus, illegalDumping]);
+                servicedDate: todayDate,
+                illegalDumping: illegalDumping
+            };
 
-    useEffect(() => {
-        const updateServiceDB = async () => {
-            const logExists = await getUserServiceLogForCanAndWeek(can._id, user._id, getWeekOf(new Date()));
-            //const logExists = false
-            if (logExists){
-                await updateUserServiceLog(serviceData, can._id, user._id, getWeekOf(new Date()) )
-            } else {
-                await addUserServiceLog(serviceData)
-            }
+            const createdLog = await addUserServiceLog(newServiceData); // Ideally return the full log from API
+            const updatedLogs = [...serviceLogsOfWeek, newServiceData];
+            // @ts-ignore
+            setServiceLogsOfWeek(updatedLogs);
+            await addToCache(`${user._id}-serviceLogs-${getWeekOf(new Date())}`, updatedLogs);
         }
-        if (Object.keys(serviceData).length > 0){
-            updateServiceDB();
-
-        }
-    }, [serviceData]);
+    };
 
 
     const closeModal = () => setShowModal(false);
@@ -176,6 +211,24 @@ const CanModal = ({
                             <Text className="text-base text-white">Unserviced</Text>
                         </TouchableOpacity>
                     </View>
+                    <TouchableOpacity
+                        className="mt-4 w-full bg-green-600 py-3 rounded-xl flex-row items-center justify-center gap-2"
+                        activeOpacity={0.8}
+                        onPress={async () => {
+                            setShowModal(false);
+                            await confirmServiceLog();
+                        }}
+                    >
+                        <Text className="text-white font-semibold text-base">Confirm Changes</Text>
+                        <Image
+                            source={icons.check}
+                            resizeMode="contain"
+                            className="w-6 h-6"
+                            tintColor="#fff"
+                        />
+                    </TouchableOpacity>
+
+
                 </View>
             </View>
         </Modal>
