@@ -6,6 +6,8 @@ export const INITIAL_REGION = {
 };
 
 
+
+
 export const getMapMarkers = (cansData: any[]) => {
     return cansData.map(can => ({
         coordinate: {
@@ -22,12 +24,16 @@ export const getMapMarkers = (cansData: any[]) => {
 import { Linking, Platform } from 'react-native';
 
 export const openMaps = (latitude: number, longitude: number, label: string = "Can Location") => {
+    const latLng = `${latitude},${longitude}`;
+    const labelEncoded = encodeURIComponent(label);
+
     const url =
         Platform.OS === 'ios'
-            ? `http://maps.apple.com/?ll=${latitude},${longitude}&q=${label}`
-            : `geo:${latitude},${longitude}?q=${latitude},${longitude}(${label})`;
+            ? `http://maps.apple.com/?ll=${latLng}&q=${labelEncoded}`
+            : `https://www.google.com/maps/search/?api=1&query=${latLng}&query_place_id=${labelEncoded}`;
 
     Linking.openURL(url).catch((err) => {
         console.error("Failed to open maps:", err);
     });
 };
+

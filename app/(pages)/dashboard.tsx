@@ -21,6 +21,7 @@ import useFetch from "@/hooks/useFetch";
 import {getUserCansForDay} from "@/services/api";
 import {useAuth} from "@/contexts/AuthContext";
 import CanModal from "@/app/components/CanModal";
+import {useServiceLog} from "@/contexts/ServiceLogContext";
 
 const weekdayMap = {
     "0": "Sunday",
@@ -66,6 +67,7 @@ const dashboard = () => {
     const [activeMarkerLabel, setActiveMarkerLabel] = useState<string | null>(null);
     const [pressedCan, setPressedCan] = useState();
     const [showModal, setShowModal] = useState(false);
+    const { serviceLogsOfWeek, setServiceLogsOfWeek, serviceLogsLoading } = useServiceLog();
 
     const focusMap = () => {
         if (pinLocation) {
@@ -84,7 +86,15 @@ const dashboard = () => {
         }
     };
 
+     const isCanServiced = (currentCan: any) => {
+        const temp = serviceLogsOfWeek.find( (canService) => ((canService.canId === currentCan._id) && (canService.servicedDate === new Date().toISOString().split("T")[0])) && (canService.status === "serviced") )
+        if (temp) {
+            return true;
+        } else {
+            return false;
+        }
 
+    }
 
 
     useEffect(() => {
@@ -125,66 +135,87 @@ const dashboard = () => {
 
             <View className="absolute inset-0 z-0">
                 <View className="flex-1">
-                    {mapMarkers && (
+                    {mapMarkers ? (
                         <MapView
+                            key={mapMarkers?.length || 0 } // 🔁 force new MapView when markers load
                             style={{width: "100%", height: "100%"}}
                             initialRegion={INITIAL_REGION}
                             showsUserLocation={true}
                             ref={mapRef}
                         >
-                            {mapMarkers?.map((marker: any, index: number) => (
-                                <Marker
-                                    key={index}
-                                    coordinate={marker.coordinate}
-                                    title={marker.label}
-                                    ref={(ref) => {
-                                        if (ref) markerRefs.current[marker.label] = ref;
-                                    }}
-                                    onPress={() => {
-                                        setActiveMarkerLabel(marker.label)
-                                        setPressedCan(marker.can)
-                                        setShowModal(true)
-                                    }}
-                                >
-                                    <Image
-                                        source={icons.trash}
-                                        resizeMode="contain"
-                                        style={{
-                                            width: 30,
-                                            height: 30,
-                                            tintColor: activeMarkerLabel === marker.label ? '#FFA500' : '#085484',
-
+                            {mapMarkers?.map((marker: any, index: number) => {
+                                const serviced = isCanServiced(marker.can)
+                                return (
+                                    <Marker
+                                        key={index}
+                                        coordinate={marker.coordinate}
+                                        title={marker.label}
+                                        ref={(ref) => {
+                                            if (ref) markerRefs.current[marker.label] = ref;
                                         }}
-                                    />
-                                    <Callout tooltip={false} style={{ backgroundColor: '#085484' }}>
+                                        onPress={() => {
+                                            setActiveMarkerLabel(marker.label)
+                                            setPressedCan(marker.can)
+                                            setShowModal(true)
+                                        }}
+                                    >
+
                                         <View
-                                            style={{
-                                                backgroundColor: '#085484',
-                                                padding: 6,
-                                                borderRadius: 20,
-                                                width: 160,
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                            }}
+                                            className="relative"
                                         >
-                                            <Text
+                                            <Image
+                                                source={icons.trash}
+                                                resizeMode="contain"
+                                                className="w-[30px] h-[30px]"
                                                 style={{
-                                                    fontWeight: '600',
-                                                    textAlign: 'center',
-                                                    color: 'white',
-                                                    flexWrap: 'wrap',
+                                                    tintColor: activeMarkerLabel === marker.label ? '#FFA500' : '#085484',
+                                                }}
+                                            />
+                                            {serviced && (
+                                                <Image
+                                                    source={icons.smallCheck}
+                                                    resizeMode="contain"
+                                                    tintColor="green"
+                                                    className="size-10 absolute"
+                                                />
+                                            )}
+                                        </View>
+                                        <Callout tooltip={false} style={{ backgroundColor: '#085484' }}>
+                                            <View
+                                                style={{
+                                                    backgroundColor: '#085484',
+                                                    padding: 6,
+                                                    borderRadius: 20,
+                                                    width: 160,
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
                                                 }}
                                             >
-                                                {marker.label}
-                                            </Text>
-                                        </View>
-                                    </Callout>
-                                </Marker>
-                            ))}
+                                                <Text
+                                                    style={{
+                                                        fontWeight: '600',
+                                                        textAlign: 'center',
+                                                        color: 'white',
+                                                        flexWrap: 'wrap',
+                                                    }}
+                                                >
+                                                    {marker.label}
+                                                </Text>
+                                            </View>
+                                        </Callout>
+                                    </Marker>
+                                    )
+                            })}
 
                         </MapView>
-                    )
-                    }
+                    ): (
+                        <MapView
+                            style={{width: "100%", height: "100%"}}
+                            initialRegion={INITIAL_REGION}
+                            showsUserLocation={true}
+                        />
+
+                    )}
                 </View>
             </View>
 

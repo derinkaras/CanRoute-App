@@ -1,17 +1,31 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
     View,
     Text,
     SafeAreaView,
     Image,
-    TouchableOpacity,
+    TouchableOpacity, ActivityIndicator,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import images from '@/app/constants/images';
 import { useRouter } from "expo-router";
+import { useAuth } from "@/contexts/AuthContext";
 
-const index = () => {
+const Index = () => {
     const router = useRouter();
+    const [initializing, setInitializing] = useState(true);
+
+    setTimeout(() => setInitializing(false), 1000);
+
+    if (initializing) {
+        return (
+            <View className="flex-1 justify-center items-center bg-lightBlue">
+                <ActivityIndicator
+                    size="large"
+                    color="#007bff"
+                />
+            </View>
+        );
+    }
 
     return (
         <View className="flex-1 bg-lightBlue">
@@ -25,12 +39,11 @@ const index = () => {
                     />
                 </View>
             </SafeAreaView>
+
             {/* Bottom Section */}
             <View className="relative bg-darkBlue mt-32 shadow-xl shadow-white flex-1">
-                {/* Main Content */}
                 <View className="px-6 gap-y-8 w-full items-center mt-14">
-                    {/* Text */}
-                    <Text className="text-4xl text-white font-bold text-center ">
+                    <Text className="text-4xl text-white font-bold text-center">
                         Welcome to CanRoute!
                     </Text>
                     <Text className="text-white text-center text-base px-4">
@@ -38,7 +51,6 @@ const index = () => {
                         Navigate routes, log service, and stay organized on the go.
                     </Text>
 
-                    {/* Button */}
                     <View className="w-full">
                         <TouchableOpacity
                             className="bg-lightBlue py-6 rounded-xl active:bg-neutral-800"
@@ -57,4 +69,4 @@ const index = () => {
     );
 };
 
-export default index;
+export default Index;

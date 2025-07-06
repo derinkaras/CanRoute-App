@@ -107,8 +107,8 @@ const CanModal = ({
         setPinLocation({
             latitude: can.location.latitude,
             longitude: can.location.longitude,
-            latitudeDelta: 0.005,
-            longitudeDelta: 0.005,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
         })
         closeModal();
         setMoveSliderUp(false);
@@ -117,7 +117,7 @@ const CanModal = ({
 
     const handleOpenMap = () => {
         if (can){
-            openMaps(can.location.latitude, can.location.longitude)
+            openMaps(can.location.latitude, can.location.longitude, can.label)
         }
     }
 

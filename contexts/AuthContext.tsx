@@ -15,6 +15,7 @@ type AuthContextType = {
     login: (name: string, email: string, password: string) => Promise<{success: boolean} | undefined>;
     signup: (name: string, email: string, password: string, userPayrollNumber: Number ) => Promise<{ success: boolean } | undefined>;
     logout: () => Promise<void>;
+    initializing: boolean;
 };
 
 
@@ -26,6 +27,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
     const [user, setUser] = useState<Record<string, any> | null>(null);
     const [token, setToken] = useState<string | null>(null);
     const [loading, setLoading] = useState(false)
+    const [initializing, setInitializing] = useState<boolean>(true)
     const validateEmail = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     const validatePassword = (password: string): boolean => password.length >= 6;
     const router = useRouter()
@@ -43,6 +45,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
             const storedToken = await AsyncStorage.getItem("token");
             setUser(parsedUser);
             setToken(storedToken);
+            setInitializing(false);
         };
         persistUser();
         clearAsyncStorageExcept(["user", "token"])
@@ -182,7 +185,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
 
 
     return (
-        <AuthContext.Provider value={{ user, token, loading, login, signup, logout}}>
+        <AuthContext.Provider value={{ user, token, loading, login, signup, logout, initializing}}>
             {children}
         </AuthContext.Provider>
     );

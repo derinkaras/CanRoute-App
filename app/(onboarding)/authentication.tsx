@@ -15,6 +15,7 @@ const authentication = () => {
     const {user, loading, login, signup} = useAuth()
 
     return (
+
         <View
             className="flex-1 bg-darkBlue"
         >

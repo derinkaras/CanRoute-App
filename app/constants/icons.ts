@@ -8,6 +8,8 @@ import trash from "../assets/icons/trash-solid.png"
 import route from "../assets/icons/route-solid.png"
 import check from "../assets/icons/square-check-solid.png"
 import search from "../assets/icons/magnifying-glass-solid.png"
+import smallCheck from "../assets/icons/check-solid.png"
+
 const icons = {
     bars,
     user,
@@ -18,7 +20,8 @@ const icons = {
     trash,
     route,
     check,
-    search
+    search,
+    smallCheck
 }
 
 export default icons
