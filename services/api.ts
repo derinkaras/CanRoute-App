@@ -74,7 +74,7 @@ export const addUserServiceLog = async (serviceData: serviceDataType) => {
 }
 
 export const updateUserServiceLog = async (
-    serviceData: serviceDataType,
+    serviceData: ServiceLog,
     canId: string,
     userId: string,
     weekOf: Date

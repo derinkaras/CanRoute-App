@@ -32,7 +32,6 @@ export const getFromCache = async (key: string) => {
 export const clearAsyncStorageExcept = async (keysToKeep: string[]) => {
     try {
         const allKeys = await AsyncStorage.getAllKeys();
-        // @ts-ignore
         const keysToRemove = allKeys.filter(key => !keysToKeep.includes(key));
 
         if (keysToRemove.length > 0) {

@@ -1,1 +1,0 @@
-// types/global.d.ts

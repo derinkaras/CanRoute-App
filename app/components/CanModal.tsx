@@ -18,33 +18,27 @@ import {
 import {getStatusColor, getWeekOf} from "@/services/utils";
 import {useServiceLog} from "@/contexts/ServiceLogContext";
 import {addToCache} from "@/services/cache";
+import {INITIAL_REGION, openMaps} from "@/services/map";
+import MapView, {Marker} from "react-native-maps";
 
 
-export interface ServiceLog {
-    _id?: string;
-    canId: string;
-    userId: string;
-    weekOf: Date | string; // Accept either, convert before sending
-    status: string
-    servicedAt: Date;
-    servicedDate: string
-    illegalDumping: boolean;
-    notes?: string;
-}
+
 
 const CanModal = ({
                       showModal,
                       setShowModal,
                       can,
-                      user
+                      user,
+                      setPinLocation,
+                      setMoveSliderUp,
+                      setActiveMarkerLabel
                   }: any) => {
+
     const [confrim, setConfrim] = useState(false);
     const [currentCanServiceStatus, setCurrentCanServiceStatus] = useState("unserviced");
     const [illegalDumping, setIllegalDumping] = useState(false);
-    // @ts-ignore
     const { serviceLogsOfWeek, setServiceLogsOfWeek } = useServiceLog();
-    // @ts-ignore
-    const [serviceData, setServiceData] = useState<ServiceLog>({});
+    const [serviceData, setServiceData] = useState<ServiceLog | null>();
 
     useEffect(() => {
         if (serviceLogsOfWeek && can) {
@@ -56,8 +50,7 @@ const CanModal = ({
                 setCurrentCanServiceStatus(specificCanService.status);
                 setIllegalDumping(specificCanService.illegalDumping);
             } else {
-                // @ts-ignore
-                setServiceData({});
+                setServiceData(null);
                 setCurrentCanServiceStatus("unserviced");
                 setIllegalDumping(false);
             }
@@ -75,7 +68,6 @@ const CanModal = ({
                 illegalDumping: illegalDumping
             };
 
-            // @ts-ignore
             await updateUserServiceLog(newServiceData, can._id, user._id, getWeekOf(new Date()));
 
             const removedServiceLogsOfWeek = serviceLogsOfWeek.filter(log => {
@@ -88,7 +80,6 @@ const CanModal = ({
                 newServiceData
             ]
 
-            // @ts-ignore
             setServiceLogsOfWeek(updatedLogs);
             await addToCache(`${user._id}-serviceLogs-${getWeekOf(new Date())}`, updatedLogs);
 
@@ -105,18 +96,30 @@ const CanModal = ({
 
             const createdLog = await addUserServiceLog(newServiceData); // Ideally return the full log from API
             const updatedLogs = [...serviceLogsOfWeek, newServiceData];
-            // @ts-ignore
             setServiceLogsOfWeek(updatedLogs);
             await addToCache(`${user._id}-serviceLogs-${getWeekOf(new Date())}`, updatedLogs);
         }
     };
 
-
     const closeModal = () => setShowModal(false);
 
     const handleDirections = () => {
-        console.log('Opening directions to:', can.label);
+        setPinLocation({
+            latitude: can.location.latitude,
+            longitude: can.location.longitude,
+            latitudeDelta: 0.005,
+            longitudeDelta: 0.005,
+        })
+        closeModal();
+        setMoveSliderUp(false);
+        setActiveMarkerLabel(can.label)
     };
+
+    const handleOpenMap = () => {
+        if (can){
+            openMaps(can.location.latitude, can.location.longitude)
+        }
+    }
 
     const handleServiceStatusChange = async (status: string) => {
         switch (status) {
@@ -149,24 +152,72 @@ const CanModal = ({
                         {can && can.label}
                     </Text>
 
-                    <TouchableOpacity
-                        onPress={handleDirections}
-                        className="items-center gap-2"
-                        activeOpacity={0.8}
+                    <View
+                        className="flex-row gap-4"
                     >
-                        <Image
-                            source={icons.route}
-                            className="size-10"
-                            resizeMode="contain"
-                            tintColor="#193a5a"
-                        />
-                        <Text className="text-darkBlue font-medium text-sm">
-                            Tap icon to open directions
-                        </Text>
-                    </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={handleOpenMap}
+                            className="items-center gap-2"
+                            activeOpacity={0.8}
+                        >
+                            <Image
+                                source={icons.route}
+                                className="size-8"
+                                resizeMode="contain"
+                                tintColor="#193a5a"
+                            />
+                        </TouchableOpacity>
 
-                    <View className="w-full h-40 bg-lightBlue rounded-md justify-center items-center">
-                        <Text className="text-white font-medium">[ Map Pin Placeholder ]</Text>
+                        <TouchableOpacity
+                            onPress={handleDirections}
+                            className="items-center gap-2"
+                            activeOpacity={0.8}
+                        >
+                            <Image
+                                source={icons.search}
+                                className="size-8"
+                                resizeMode="contain"
+                                tintColor="#193a5a"
+                            />
+                        </TouchableOpacity>
+                    </View>
+
+                    <View className="w-full h-40 rounded-md justify-center items-center">
+                        {can?.location && (
+                                <MapView
+                                    style={{width: "100%", height: "100%"}}
+                                    initialRegion={
+                                        {
+                                            latitude: can?.location.latitude,
+                                            longitude: can?.location.longitude,
+                                            latitudeDelta: 0.005,
+                                            longitudeDelta: 0.005,
+                                        }
+
+                                    }
+                                    showsUserLocation={true}
+                                >
+                                    <Marker
+                                        coordinate={{
+                                            latitude: can.location.latitude,
+                                            longitude: can.location.longitude,
+                                        }}
+                                        title={can.label}
+                                    >
+                                        <Image
+                                            source={icons.trash}
+                                            resizeMode="contain"
+                                            style={{
+                                                width: 30,
+                                                height: 30,
+                                                tintColor:'#085484',
+
+                                            }}
+                                        />
+                                    </Marker>
+                                </MapView>
+                            )
+                        }
                     </View>
 
                     <View className={`mt-3 px-4 py-2 rounded-full ${getStatusColor(currentCanServiceStatus)}`}>

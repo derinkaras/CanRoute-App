@@ -172,8 +172,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
             setLoading(true)
             setUser(null)
             setToken(null)
-            await AsyncStorage.removeItem("user")
-            await AsyncStorage.removeItem("token")
+            await clearAsyncStorageExcept([])
             router.replace("/(onboarding)")
             setLoading(false)
         } catch (error) {

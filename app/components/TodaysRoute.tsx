@@ -15,24 +15,19 @@ import CanModal from '@/app/components/CanModal';
 import {getStatusColor, getWeekOf} from "@/services/utils";
 import {useServiceLog} from "@/contexts/ServiceLogContext";
 
-const TodaysRoute = ({ date }: { date: string }) => {
+const TodaysRoute = ({setPinLocation, cansData, cansIsLoading, setMoveSliderUp, setActiveMarkerLabel}: any) => {
     const [cans, setCans] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [currentCan, setCurrentCan] = useState({});
     const { user } = useAuth();
-    const { data, isLoading, error } = useFetch(() => getUserCansForDay(user, date));
-    // @ts-ignore
     const { serviceLogsOfWeek, setServiceLogsOfWeek, serviceLogsLoading } = useServiceLog();
     const [serviceStatus, setServiceStatus] = useState("");
 
-
     useEffect(() => {
-        if (data) {
-            setCans(data);
+        if (cansData) {
+            setCans(cansData);
         }
-    }, [data]);
-
-
+    }, [cansData]);
 
 
     return (
@@ -42,9 +37,12 @@ const TodaysRoute = ({ date }: { date: string }) => {
                 setShowModal={setShowModal}
                 can={currentCan}
                 user={user}
+                setPinLocation={setPinLocation}
+                setMoveSliderUp={setMoveSliderUp}
+                setActiveMarkerLabel={setActiveMarkerLabel}
             />
 
-            {!isLoading && !serviceLogsLoading ? (
+            {!cansIsLoading && !serviceLogsLoading ? (
                 <FlatList
                     data={cans}
                     keyExtractor={(item: Record<string, any>) => item._id}

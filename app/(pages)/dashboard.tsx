@@ -1,39 +1,107 @@
-import React, {useEffect, useState} from 'react';
-import {View, Text, SafeAreaView, Image, Pressable, Button, TouchableOpacity, ScrollView} from 'react-native';
+import React, {useEffect, useRef, useState} from 'react';
+import {
+    View,
+    Text,
+    SafeAreaView,
+    Image,
+    Pressable,
+    Button,
+    TouchableOpacity,
+    ScrollView,
+    StyleSheet,
+    ActivityIndicator
+} from 'react-native';
+import MapView, { Marker, Callout } from 'react-native-maps';
 import icons from "@/app/constants/icons";
-import {useRouter} from "expo-router";
+import {useNavigation, useRouter} from "expo-router";
 import Sidebar from "@/app/components/Sidebar";
 import TodaysRoute from "@/app/components/TodaysRoute";
+import {getMapMarkers, INITIAL_REGION} from "@/services/map";
+import useFetch from "@/hooks/useFetch";
+import {getUserCansForDay} from "@/services/api";
+import {useAuth} from "@/contexts/AuthContext";
+import CanModal from "@/app/components/CanModal";
+
+const weekdayMap = {
+    "0": "Sunday",
+    "1": "Monday",
+    "2": "Tuesday",
+    "3": "Wednesday",
+    "4": "Thursday",
+    "5": "Friday",
+    "6": "Saturday",
+}
+const monthMap = {
+    "0": "January",
+    "1": "February",
+    "2": "March",
+    "3": "April",
+    "4": "May",
+    "5": "June",
+    "6": "July",
+    "7": "August",
+    "8": "September",
+    "9": "October",
+    "10": "November",
+    "11": "December",
+}
+
+
+
+
 
 const dashboard = () => {
     const router = useRouter();
     const [showSideBar, setShowSideBar] = useState(false);
     const [moveSliderUp, setMoveSliderUp] = useState(false);
     const [currentDate, setCurrentDate] = useState(new Date());
+    const [mapMarkers, setMapMarkers] = useState<any>();
+    const mapRef = useRef<MapView>(null);
+    const { user } = useAuth();
 
-    const weekdayMap = {
-        "0": "Sunday",
-        "1": "Monday",
-        "2": "Tuesday",
-        "3": "Wednesday",
-        "4": "Thursday",
-        "5": "Friday",
-        "6": "Saturday",
-    }
-    const monthMap = {
-        "0": "January",
-        "1": "February",
-        "2": "March",
-        "3": "April",
-        "4": "May",
-        "5": "June",
-        "6": "July",
-        "7": "August",
-        "8": "September",
-        "9": "October",
-        "10": "November",
-        "11": "December",
-    }
+    const [pinLocation, setPinLocation] = useState<PinLocation | null>(null);
+    const { data: cansData, isLoading: cansIsLoading, error } = useFetch(() => getUserCansForDay(user, weekdayMap[currentDate.getDay().toString() as keyof typeof weekdayMap]));
+    // @ts-ignore
+    const markerRefs = useRef<Record<string, Marker | null>>({});
+    const [activeMarkerLabel, setActiveMarkerLabel] = useState<string | null>(null);
+    const [pressedCan, setPressedCan] = useState();
+    const [showModal, setShowModal] = useState(false);
+
+    const focusMap = () => {
+        if (pinLocation) {
+            mapRef.current?.animateToRegion(pinLocation);
+
+            // Find and show the marker callout
+            const targetMarker = mapMarkers?.find(
+                (m: any) =>
+                    m.coordinate?.latitude === pinLocation?.latitude &&
+                    m.coordinate?.longitude === pinLocation?.longitude
+            );
+            if (targetMarker) {
+                const markerRef = markerRefs.current[targetMarker.label];
+                markerRef?.showCallout();
+            }
+        }
+    };
+
+
+
+
+    useEffect(() => {
+        if (cansData){
+            const mapMarkers = getMapMarkers(cansData);
+            setMapMarkers(mapMarkers)
+        }
+
+    }, [cansData]);
+
+
+    useEffect(() => {
+        if (pinLocation) {
+            focusMap();
+        }
+    }, [pinLocation]);
+
     useEffect(() => {
         const timer = setInterval(()=>{
             setCurrentDate(new Date());
@@ -41,20 +109,97 @@ const dashboard = () => {
         return () => clearInterval(timer)
     }, [])
 
+
     return (
-        <View className="flex flex-1 bg-white">
+        <View className="flex flex-1 bg-white relative z-5">
+
+            <CanModal
+                showModal={showModal}
+                setShowModal={setShowModal}
+                can={pressedCan}
+                user={user}
+                setPinLocation={setPinLocation}
+                setMoveSliderUp={setMoveSliderUp}
+                setActiveMarkerLabel={setActiveMarkerLabel}
+            />
+
+            <View className="absolute inset-0 z-0">
+                <View className="flex-1">
+                    {mapMarkers && (
+                        <MapView
+                            style={{width: "100%", height: "100%"}}
+                            initialRegion={INITIAL_REGION}
+                            showsUserLocation={true}
+                            ref={mapRef}
+                        >
+                            {mapMarkers?.map((marker: any, index: number) => (
+                                <Marker
+                                    key={index}
+                                    coordinate={marker.coordinate}
+                                    title={marker.label}
+                                    ref={(ref) => {
+                                        if (ref) markerRefs.current[marker.label] = ref;
+                                    }}
+                                    onPress={() => {
+                                        setActiveMarkerLabel(marker.label)
+                                        setPressedCan(marker.can)
+                                        setShowModal(true)
+                                    }}
+                                >
+                                    <Image
+                                        source={icons.trash}
+                                        resizeMode="contain"
+                                        style={{
+                                            width: 30,
+                                            height: 30,
+                                            tintColor: activeMarkerLabel === marker.label ? '#FFA500' : '#085484',
+
+                                        }}
+                                    />
+                                    <Callout tooltip={false} style={{ backgroundColor: '#085484' }}>
+                                        <View
+                                            style={{
+                                                backgroundColor: '#085484',
+                                                padding: 6,
+                                                borderRadius: 20,
+                                                width: 160,
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                            }}
+                                        >
+                                            <Text
+                                                style={{
+                                                    fontWeight: '600',
+                                                    textAlign: 'center',
+                                                    color: 'white',
+                                                    flexWrap: 'wrap',
+                                                }}
+                                            >
+                                                {marker.label}
+                                            </Text>
+                                        </View>
+                                    </Callout>
+                                </Marker>
+                            ))}
+
+                        </MapView>
+                    )
+                    }
+                </View>
+            </View>
+
             {showSideBar && (
                 <Sidebar setShowSideBar={setShowSideBar} />
             )}
             <View className="flex-row mx-5 items-center relative mt-20">
                 <TouchableOpacity
-                    className="w-12 h-12 bg-gray-300 rounded-full overflow-hidden justify-center items-center z-0"
+                    className="w-12 h-12 bg-lightBlue rounded-full overflow-hidden justify-center items-center z-0"
                     onPress={() => setShowSideBar(!showSideBar)}
                 >
                     <Image
                         source={icons.bars}
                         className="size-6"
-                        tintColor="#085484"
+                        tintColor="white"
                     />
                 </TouchableOpacity>
                 <View className="absolute left-1/2 -translate-x-1/2 items-center">
@@ -69,10 +214,8 @@ const dashboard = () => {
                             {currentDate.getDate().toString()}
                         </Text>
                     </View>
-                </View>
-            </View>
 
-            <View className="flex-1">
+                </View>
 
             </View>
             {moveSliderUp ? (
@@ -84,7 +227,13 @@ const dashboard = () => {
                     <View
                         className="w-full h-1/2 bg-lightBlue absolute bottom-0 left-0 right-0"
                     >
-                        <TodaysRoute date={weekdayMap[currentDate.getDay().toString() as keyof typeof weekdayMap]}/>
+                        <TodaysRoute
+                            setPinLocation={setPinLocation}
+                            cansData={cansData}
+                            cansIsLoading={cansIsLoading}
+                            setMoveSliderUp={setMoveSliderUp}
+                            setActiveMarkerLabel={setActiveMarkerLabel}
+                        />
                     </View>
                 </View>
             ) : (

@@ -10,17 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getWeekOf } from '@/services/utils';
 import {addToCache, getFromCache} from "@/services/cache";
 
-export interface ServiceLog {
-    _id: string;
-    canId: string;
-    userId: string;
-    weekOf: Date | string; // Accept either, convert before sending
-    status: string
-    servicedAt: Date
-    servicedDate: string
-    illegalDumping: boolean;
-    notes?: string;
-}
+
 
 interface ServiceLogContextType {
     serviceLogsOfWeek: ServiceLog[];
