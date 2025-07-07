@@ -10,19 +10,22 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
 import {IconProps} from "@expo/vector-icons/build/createIconSet";
+import {useRouter} from "expo-router";
+import * as Haptics from 'expo-haptics';
 
 const Sidebar = ({ setShowSideBar }: { setShowSideBar: (val: boolean) => void }) => {
     const screenWidth = Dimensions.get('window').width;
     const sidebarWidth = screenWidth * (2 / 3);
     const { user, logout } = useAuth();
-    
-    const menuItems: { label: string; icon: IconProps<any>['name'] }[] = [
-        { label: 'Dashboard', icon: 'grid-outline' },
-        { label: 'All Cans', icon: 'trash-outline' },
-        { label: 'Service History', icon: 'time-outline' },
-        { label: 'Notifications', icon: 'notifications-outline' },
-        { label: 'Settings', icon: 'settings-outline' },
-        { label: 'Report a Problem', icon: 'alert-circle-outline' }
+    const router = useRouter();
+
+    const menuItems: { label: string; icon: IconProps<any>['name'], path: string }[] = [
+        { label: 'Dashboard', icon: 'grid-outline', path: 'dashboard' },
+        { label: 'Transfer Cans', icon: 'trash-outline', path: "transferCans"},
+        { label: 'Service History', icon: 'time-outline', path: "service-history" },
+        { label: 'Notifications', icon: 'notifications-outline', path: "notifications"},
+        { label: 'Settings', icon: 'settings-outline', path: "settings"},
+        { label: 'Report a Problem', icon: 'alert-circle-outline', path: "report"},
     ];
 
 
@@ -60,7 +63,10 @@ const Sidebar = ({ setShowSideBar }: { setShowSideBar: (val: boolean) => void })
                                 <TouchableOpacity
                                     key={index}
                                     onPress={() => {
-                                        console.log(`${item.label} was pressed`);
+                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+                                        console.log(`Moved to path ${item.path}`);
+                                        // @ts-ignore
+                                        router.push(`/${item.path}`)
                                     }}
                                     className="flex-row items-center gap-4"
                                 >

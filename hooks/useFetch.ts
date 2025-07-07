@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 
-const useFetch = <T> (fetchFunction: () => Promise<T>, autoFetch = true) => {
+const useFetch = <T> (fetchFunction: () => Promise<T>, dependancyArr = [], autoFetch = true) => {
     const [data, setData] = useState<T | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
@@ -29,7 +29,7 @@ const useFetch = <T> (fetchFunction: () => Promise<T>, autoFetch = true) => {
         if (autoFetch) {
             fetchData();
         }
-    },[])
+    },[...dependancyArr])
 
     return {data, isLoading, refetch: fetchData, error, reset};
  }

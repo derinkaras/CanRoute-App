@@ -22,6 +22,7 @@ import {getUserCansForDay} from "@/services/api";
 import {useAuth} from "@/contexts/AuthContext";
 import CanModal from "@/app/components/CanModal";
 import {useServiceLog} from "@/contexts/ServiceLogContext";
+import * as Haptics from 'expo-haptics';
 
 const weekdayMap = {
     "0": "Sunday",
@@ -225,7 +226,10 @@ const dashboard = () => {
             <View className="flex-row mx-5 items-center relative mt-20">
                 <TouchableOpacity
                     className="w-12 h-12 bg-lightBlue rounded-full overflow-hidden justify-center items-center z-0"
-                    onPress={() => setShowSideBar(!showSideBar)}
+                    onPress={() => {
+                        setShowSideBar(!showSideBar)
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+                    }}
                 >
                     <Image
                         source={icons.bars}

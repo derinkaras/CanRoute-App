@@ -93,7 +93,7 @@ export default function RootLayout() {
             </AuthProvider>
             <Toast
                 position="top"
-                visibilityTime={1000}
+                visibilityTime={2000}
                 topOffset={60}
                 config={toastConfig}
             />

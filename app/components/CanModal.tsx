@@ -75,6 +75,7 @@ const CanModal = ({
                 return true;
             })
 
+
             const updatedLogs = [
                 ...removedServiceLogsOfWeek,
                 newServiceData

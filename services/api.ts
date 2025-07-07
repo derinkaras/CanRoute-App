@@ -157,6 +157,29 @@ export const getUserServiceLogsForAllCansOfWeek = async (
     }
 };
 
+export const checkIfEmailExists = async (email: string) => {
+    try {
+        console.log("Email: ", email);
+        const storedToken = await AsyncStorage.getItem('token');
+        const response = await fetch(`https://canroute.onrender.com/api/v1/users/user-exists/${email}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${storedToken}`
+            }
+        })
+        console.log("This is the response: ", response);
+        const json = await response.json();
+        console.log("This is the JSON: ", JSON.stringify(json, null, 2));
+        return json.data;
+
+    } catch(error) {
+        console.error("Fetch error:", error);
+        return false;
+    }
+
+}
+
 
 
 
