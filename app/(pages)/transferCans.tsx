@@ -11,7 +11,7 @@ import { useRouter } from 'expo-router';
 import Sidebar from '@/app/components/Sidebar';
 import icons from '@/app/constants/icons';
 import useFetch from "@/hooks/useFetch";
-import {checkIfEmailExists, getUserCansForDay} from "@/services/api";
+import {addTransfer, checkIfEmailExists, getUserCansForDay} from "@/services/api";
 import {useAuth} from "@/contexts/AuthContext";
 import {getStatusColor} from "@/services/utils";
 import * as Haptics from 'expo-haptics';
@@ -23,6 +23,7 @@ const transferCans = () => {
     const [personToTransferTo, setPersonToTransferTo] = useState('');
     const [showDropdown, setShowDropdown] = useState(false);
     const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const {user} = useAuth();
 
     const weekdayMap = {
         "0": "Sunday",
@@ -37,7 +38,6 @@ const transferCans = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
     // @ts-ignore
     const [selectedDay, setSelectedDay] = useState<string>(weekdayMap[currentDate.getDay()]);
-    const {user} = useAuth();
 
     useEffect(() => {
         const timer = setInterval(()=>{
@@ -54,8 +54,7 @@ const transferCans = () => {
 
 
     const handleSend = async () => {
-        {
-            console.log("This is the selected cans to send: ", JSON.stringify(selectedCans, null, 2));
+
             if (!personToTransferTo){
                 Toast.show(
                     {
@@ -76,8 +75,8 @@ const transferCans = () => {
                 )
                 return
             }
-            const isExists = await checkIfEmailExists(personToTransferTo)
-            if (!isExists) {
+            const toUser = await checkIfEmailExists(personToTransferTo)
+            if (!toUser.success) {
                 Toast.show(
                     {
                         type: 'error',
@@ -85,6 +84,7 @@ const transferCans = () => {
                         text2: 'Please try again',
                     }
                 )
+                return
             } else {
                 Toast.show(
                     {
@@ -95,7 +95,18 @@ const transferCans = () => {
                 )
 
             }
-        }
+
+
+        const transferObj = await addTransfer(
+            {
+                fromName: user?.name,
+                toName: toUser.data.name,
+                fromId: user?._id,
+                toId: toUser.data._id,
+                cans: selectedCans.current,
+            }
+        )
+
     }
 
 

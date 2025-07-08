@@ -22,8 +22,8 @@ const Sidebar = ({ setShowSideBar }: { setShowSideBar: (val: boolean) => void })
     const menuItems: { label: string; icon: IconProps<any>['name'], path: string }[] = [
         { label: 'Dashboard', icon: 'grid-outline', path: 'dashboard' },
         { label: 'Transfer Cans', icon: 'trash-outline', path: "transferCans"},
-        { label: 'Service History', icon: 'time-outline', path: "service-history" },
         { label: 'Notifications', icon: 'notifications-outline', path: "notifications"},
+        { label: 'Service History', icon: 'time-outline', path: "service-history" },
         { label: 'Settings', icon: 'settings-outline', path: "settings"},
         { label: 'Report a Problem', icon: 'alert-circle-outline', path: "report"},
     ];

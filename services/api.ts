@@ -159,7 +159,6 @@ export const getUserServiceLogsForAllCansOfWeek = async (
 
 export const checkIfEmailExists = async (email: string) => {
     try {
-        console.log("Email: ", email);
         const storedToken = await AsyncStorage.getItem('token');
         const response = await fetch(`https://canroute.onrender.com/api/v1/users/user-exists/${email}`, {
             method: 'GET',
@@ -168,10 +167,8 @@ export const checkIfEmailExists = async (email: string) => {
                 'Authorization': `Bearer ${storedToken}`
             }
         })
-        console.log("This is the response: ", response);
         const json = await response.json();
-        console.log("This is the JSON: ", JSON.stringify(json, null, 2));
-        return json.data;
+        return json;
 
     } catch(error) {
         console.error("Fetch error:", error);
@@ -179,6 +176,51 @@ export const checkIfEmailExists = async (email: string) => {
     }
 
 }
+
+
+export const addTransfer = async (body: Record<string, any>) => {
+    try {
+        const storedToken = await AsyncStorage.getItem('token');
+        const request = await fetch("https://canroute.onrender.com/api/v1/transfer", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${storedToken}`
+            },
+            body: JSON.stringify({
+                ...body,
+            })
+        })
+        const result = await request.json()
+        return result.data
+    } catch (error) {
+        console.error("There was an error adding the transfer: ", error);
+    }
+
+}
+
+export const getTransferRequests = async () => {
+    try {
+        const user = await getFromCache("user");
+        const storedToken = await AsyncStorage.getItem('token');
+        const response = await fetch(`https://canroute.onrender.com/api/v1/transfer/${user._id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${storedToken}`
+            }
+        });
+        const result = await response.json();
+        if (!result.success) {
+            throw new Error(result.error);
+        }
+        return result.data;
+    } catch (error) {
+        console.error("There was an error in the get transfer requests: ", error);
+    }
+}
+
+
 
 
 
