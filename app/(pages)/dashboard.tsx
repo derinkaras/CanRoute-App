@@ -23,6 +23,7 @@ import {useAuth} from "@/contexts/AuthContext";
 import CanModal from "@/app/components/CanModal";
 import {useServiceLog} from "@/contexts/ServiceLogContext";
 import * as Haptics from 'expo-haptics';
+import {getWeekDay} from "@/services/utils";
 
 const weekdayMap = {
     "0": "Sunday",
@@ -62,7 +63,8 @@ const dashboard = () => {
     const { user } = useAuth();
 
     const [pinLocation, setPinLocation] = useState<PinLocation | null>(null);
-    const { data: cansData, isLoading: cansIsLoading, error } = useFetch(() => getUserCansForDay(user, weekdayMap[currentDate.getDay().toString() as keyof typeof weekdayMap]));
+    const { data: cansData, isLoading: cansIsLoading, error } = useFetch(() => getUserCansForDay(user, getWeekDay(currentDate)));
+
     // @ts-ignore
     const markerRefs = useRef<Record<string, Marker | null>>({});
     const [activeMarkerLabel, setActiveMarkerLabel] = useState<string | null>(null);

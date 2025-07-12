@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     View,
     Text,
@@ -12,13 +12,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import {IconProps} from "@expo/vector-icons/build/createIconSet";
 import {useRouter} from "expo-router";
 import * as Haptics from 'expo-haptics';
+import {getNumberOfNotifications} from "@/services/api";
 
 const Sidebar = ({ setShowSideBar }: { setShowSideBar: (val: boolean) => void }) => {
     const screenWidth = Dimensions.get('window').width;
     const sidebarWidth = screenWidth * (2 / 3);
     const { user, logout } = useAuth();
     const router = useRouter();
-
+    const [numberOfNotifications, setNumberOfNotifications] = useState(0);
     const menuItems: { label: string; icon: IconProps<any>['name'], path: string }[] = [
         { label: 'Dashboard', icon: 'grid-outline', path: 'dashboard' },
         { label: 'Transfer Cans', icon: 'trash-outline', path: "transferCans"},
@@ -28,7 +29,14 @@ const Sidebar = ({ setShowSideBar }: { setShowSideBar: (val: boolean) => void })
         { label: 'Report a Problem', icon: 'alert-circle-outline', path: "report"},
     ];
 
-
+    useEffect(() => {
+        const fetchNotifocations = async () => {
+            const numberOfNotifications = await getNumberOfNotifications();
+            // @ts-ignore
+            setNumberOfNotifications(numberOfNotifications)
+        }
+        fetchNotifocations();
+    }, []);
     return (
         <View className="flex-row absolute inset-0 z-10">
             <View
@@ -60,21 +68,33 @@ const Sidebar = ({ setShowSideBar }: { setShowSideBar: (val: boolean) => void })
                         {/* Menu Items */}
                         <View className="gap-10">
                             {menuItems.map((item, index) => (
-                                <TouchableOpacity
+                                <View
                                     key={index}
-                                    onPress={() => {
-                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-                                        console.log(`Moved to path ${item.path}`);
-                                        // @ts-ignore
-                                        router.push(`/${item.path}`)
-                                    }}
-                                    className="flex-row items-center gap-4"
                                 >
-                                    <Ionicons name={item.icon} size={22} color="white" />
-                                    <Text className="text-white text-xl font-medium">
-                                        {item.label}
-                                    </Text>
-                                </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+                                            console.log(`Moved to path ${item.path}`);
+                                            // @ts-ignore
+                                            router.push(`/${item.path}`)
+                                        }}
+                                        className="flex-row items-center gap-4 relative"
+                                    >
+                                        <Ionicons name={item.icon} size={22} color="white"/>
+                                        <Text className="text-white text-xl font-medium">
+                                            {item.label}
+                                        </Text>
+                                        {item.label === "Notifications" && numberOfNotifications > 0 && (
+                                            <View
+                                                className="bg-red-500 rounded-full absolute px-2 ml-3 mb-7"
+                                            >
+                                                <Text className="text-white text-base">{numberOfNotifications}</Text>
+                                            </View>
+                                        )}
+                                    </TouchableOpacity>
+
+
+                                </View>
                             ))}
                         </View>
                     </View>

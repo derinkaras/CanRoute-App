@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {addToCache, getFromCache} from "@/services/cache";
+import {addToCache, deleteFromCache, getFromCache} from "@/services/cache";
+import {getWeekDay} from "@/services/utils";
 
 // For the useFetch hook to work with these make sure you're always returning the actual data
 
@@ -40,6 +41,8 @@ export const getUserCansForDay = async (user: Record<string, any> | null, date: 
         return []
     }
 }
+
+
 
 interface serviceDataType {
     canId: Number,
@@ -220,8 +223,54 @@ export const getTransferRequests = async () => {
     }
 }
 
+export const deleteTransfer = async (id: string) => {
+    // The id here is the id of the transfer to be deleted
+    try {
+        const storedToken = await AsyncStorage.getItem('token');
+        const request = await fetch(`https://canroute.onrender.com/api/v1/transfer/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${storedToken}`
+            }
+        })
+        const result = await request.json()
+        return result.message
+    } catch (error) {
+        console.error("There was an error deleting transfer: ", error);
+    }
+}
 
 
+export const acceptTransfer = async (id: string, userId: string) => {
+    try {
+        const storedToken = await AsyncStorage.getItem('token');
+        const request = await fetch(`https://canroute.onrender.com/api/v1/transfer/accept/${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${storedToken}`
+            }
+        })
+        const result = await request.json()
+        const currentDay = getWeekDay(new Date());
+        await deleteFromCache(`${userId}-${currentDay}-cans`)
+
+    } catch (error){
+        console.error("There was an error accepting the transfer: ", error);
+    }
+}
+
+
+export const getNumberOfNotifications = async () => {
+    try {
+        // When can maintenance is implemented this will be added here ofc
+        const numberOfTransferRequests = await getTransferRequests();
+        return Object.keys(numberOfTransferRequests).length || 0
+    } catch (error) {
+        console.error("The error happened in get number of notifciations: ", error);
+    }
+}
 
 
 
