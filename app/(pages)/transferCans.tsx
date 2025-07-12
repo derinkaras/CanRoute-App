@@ -131,7 +131,7 @@ const transferCans = () => {
                 </View>
             </View>
 
-            <View className="mx-5 mt-8 gap-y-4">
+            <View className="mx-5 mt-8 gap-y-4 relative">
                 {/* Email Input */}
                 <View className="flex-row items-center bg-darkBlue rounded-2xl px-4 gap-2">
                     <Image source={icons.user} className="size-6" tintColor="white" resizeMode="contain"/>
@@ -162,7 +162,7 @@ const transferCans = () => {
 
                 {/* Options list (dropdown items) */}
                 {showDropdown && (
-                    <View className="bg-darkBlue rounded-2xl mt-1">
+                    <View className="bg-darkBlue rounded-2xl absolute z-10 w-full mt-36">
                         {days.map((day, index) => (
                             <TouchableOpacity
                                 key={index}

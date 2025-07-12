@@ -23,6 +23,12 @@ const _layout = () => {
                     headerShown: false,
                 }}
             />
+            <Stack.Screen
+                name="manageCans"
+                options={{
+                    headerShown: false,
+                }}
+            />
         </Stack>
 
     );

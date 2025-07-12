@@ -22,12 +22,12 @@ const Sidebar = ({ setShowSideBar }: { setShowSideBar: (val: boolean) => void })
     const [numberOfNotifications, setNumberOfNotifications] = useState(0);
     const menuItems: { label: string; icon: IconProps<any>['name'], path: string }[] = [
         { label: 'Dashboard', icon: 'grid-outline', path: 'dashboard' },
-        { label: 'Transfer Cans', icon: 'trash-outline', path: "transferCans"},
-        { label: 'Notifications', icon: 'notifications-outline', path: "notifications"},
+        { label: 'Transfer Cans', icon: 'trash-outline', path: "transferCans" },
+        { label: 'Manage Cans', icon: 'construct-outline', path: "manageCans" },
+        { label: 'Notifications', icon: 'notifications-outline', path: "notifications" },
         { label: 'Service History', icon: 'time-outline', path: "service-history" },
-        { label: 'Settings', icon: 'settings-outline', path: "settings"},
-        { label: 'Report a Problem', icon: 'alert-circle-outline', path: "report"},
     ];
+
 
     useEffect(() => {
         const fetchNotifocations = async () => {
@@ -38,7 +38,7 @@ const Sidebar = ({ setShowSideBar }: { setShowSideBar: (val: boolean) => void })
         fetchNotifocations();
     }, []);
     return (
-        <View className="flex-row absolute inset-0 z-10">
+        <View className="flex-row absolute inset-0 z-50">
             <View
                 style={{
                     width: sidebarWidth,
@@ -103,10 +103,10 @@ const Sidebar = ({ setShowSideBar }: { setShowSideBar: (val: boolean) => void })
                     <View className="mt-10">
                         <View className="border-t border-lightBlue mb-4" />
                         <TouchableOpacity onPress={logout} className="mb-4">
-                            <Text className="text-white text-xl">Logout</Text>
+                            <Text className="text-white text-base">Logout</Text>
                         </TouchableOpacity>
-                        <Text className="text-white text-xl">Help</Text>
-                        <Text className="text-white text-xl mt-2">Contact Fleet Safety</Text>
+                        <Text className="text-white text-base">Report a Problem</Text>
+                        <Text className="text-white text-base mt-2">Contact Fleet Safety</Text>
                     </View>
                 </View>
             </View>
