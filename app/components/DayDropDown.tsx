@@ -1,11 +1,14 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {View, Text, TouchableOpacity, Image} from 'react-native';
 import icons from "@/app/constants/icons";
 import {getWeekDay} from "@/services/utils";
 
-const DayDropDown = () => {
+const DayDropDown = ({selectedDay, setSelectedDay} : any) => {
     const [showDropdown, setShowDropdown] = useState(false);
-    const [selectedDay, setSelectedDay] = useState<string>(getWeekDay(currentDate));
+
+
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
 
     return (
         <View>

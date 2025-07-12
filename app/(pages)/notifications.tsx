@@ -40,10 +40,14 @@ const Notifications = () => {
         // Add logic for notifications here later
     };
 
-
     useEffect(() => {
-
-    }, [transferData]);
+        const fetch = async () => {
+            await refetchTransfer()
+        }
+        if(user) {
+            fetch()
+        }
+    }, []);
 
     return (
         <View className="flex-1 bg-lightBlue">

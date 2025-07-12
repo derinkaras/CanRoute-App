@@ -16,6 +16,7 @@ import {useAuth} from "@/contexts/AuthContext";
 import {getStatusColor} from "@/services/utils";
 import * as Haptics from 'expo-haptics';
 import Toast from "react-native-toast-message";
+import DayDropDown from "@/app/components/DayDropDown";
 
 const transferCans = () => {
     const router = useRouter();
@@ -145,39 +146,11 @@ const transferCans = () => {
                     />
                 </View>
 
-                {/* Dropdown */}
-                <TouchableOpacity
-                    className="flex-row items-center bg-darkBlue rounded-2xl py-2 px-4 gap-2"
-                    style={{ height: 50 }}
-                    onPress={() => setShowDropdown(!showDropdown)}
-                >
-                    <Image source={icons.calendar} className="size-6" tintColor="white" />
-                    <Text className="text-white flex-1 capitalize">{selectedDay}</Text>
-                    <Image
-                        source={icons.chevronDown}
-                        className={`size-4 ${showDropdown ? 'rotate-180' : ''}`}
-                        tintColor="white"
-                    />
-                </TouchableOpacity>
+                <DayDropDown
+                    setSelectedDay={setSelectedDay}
+                    selectedDay={selectedDay}
+                />
 
-                {/* Options list (dropdown items) */}
-                {showDropdown && (
-                    <View className="bg-darkBlue rounded-2xl absolute z-10 w-full mt-36">
-                        {days.map((day, index) => (
-                            <TouchableOpacity
-                                key={index}
-                                onPress={() => {
-                                    setSelectedDay(day);
-                                    setShowDropdown(false);
-                                }}
-                                className={`px-4 py-3 ${day !== 'sunday' ? "border-b border-white/10" : ""}`}
-
-                            >
-                                <Text className="text-white capitalize">{day}</Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                )}
                 {cansIsLoading ?  (
                     <View>
                         <ActivityIndicator

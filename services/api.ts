@@ -29,8 +29,10 @@ export const getUserCansForDay = async (user: Record<string, any> | null, date: 
     try {
         const cache = await getFromCache(`${user?._id}-${date}-cans`);
         if (cache) {
+            console.log(`Getting this key from the cache: ${user?._id}-${date}-cans`)
             return cache
         } else {
+            console.log("Getting from the api")
             const allCans = await getUserCans(user);
             const cansForDay = allCans.filter((can: { assignedDay: any; }) => can.assignedDay.toLowerCase() === date.toLowerCase());
             await addToCache(`${user?._id}-${date}-cans`, cansForDay);
@@ -254,7 +256,7 @@ export const acceptTransfer = async (id: string, userId: string) => {
         })
         const result = await request.json()
         const currentDay = getWeekDay(new Date());
-        await deleteFromCache(`${userId}-${currentDay}-cans`)
+        await deleteFromCache(`${userId}-${result.dayBeingAccepted}-cans`)
 
     } catch (error){
         console.error("There was an error accepting the transfer: ", error);
@@ -273,5 +275,25 @@ export const getNumberOfNotifications = async () => {
 }
 
 
+export const updateCansDay = async (originalDay: string, newDay: string, cans: Record<string, any>, userId: string) => {
+    try {
+        const storedToken = await AsyncStorage.getItem('token');
+        const response = await fetch(`https://canroute.onrender.com/api/v1/cans/update`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${storedToken}`
+            },
+            body: JSON.stringify({
+                updates: cans.current,
+                newDay
+            })
+        })
 
-
+        const result = await response.json()
+        deleteFromCache(`${userId}-${originalDay}-cans`)
+        deleteFromCache(`${userId}-${newDay}-cans`)
+    } catch (error) {
+        console.error("There was a problem updating cans: ", error);
+    }
+}
