@@ -164,14 +164,14 @@ const dashboard = () => {
                                     >
 
                                         <View
-                                            className="relative"
+                                            className="relative bg-lightBlue rounded-full p-2 border-2 border-white"
                                         >
                                             <Image
                                                 source={icons.trash}
                                                 resizeMode="contain"
-                                                className="w-[30px] h-[30px]"
+                                                className="w-[20px] h-[20px]"
                                                 style={{
-                                                    tintColor: activeMarkerLabel === marker.label ? '#FFA500' : '#085484',
+                                                    tintColor: activeMarkerLabel === marker.label ? '#FFA500' : 'white',
                                                 }}
                                             />
                                             {serviced && (

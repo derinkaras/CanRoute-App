@@ -29,6 +29,12 @@ const _layout = () => {
                     headerShown: false,
                 }}
             />
+            <Stack.Screen
+                name="viewAllCans"
+                options={{
+                    headerShown: false,
+                }}
+            />
         </Stack>
 
     );

@@ -76,7 +76,6 @@ const Sidebar = ({ setShowSideBar }: { setShowSideBar: (val: boolean) => void })
                                     <TouchableOpacity
                                         onPress={() => {
                                             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-                                            console.log(`Moved to path ${item.path}`);
                                             // @ts-ignore
                                             router.push(`/${item.path}`)
                                         }}

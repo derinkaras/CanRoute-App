@@ -38,6 +38,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
         }
     }, [user]);
 
+
     useEffect(() => {
         const persistUser = async () => {
             const storedUser = await AsyncStorage.getItem("user");

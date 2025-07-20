@@ -29,10 +29,8 @@ export const getUserCansForDay = async (user: Record<string, any> | null, date: 
     try {
         const cache = await getFromCache(`${user?._id}-${date}-cans`);
         if (cache) {
-            console.log(`Getting this key from the cache: ${user?._id}-${date}-cans`)
             return cache
         } else {
-            console.log("Getting from the api")
             const allCans = await getUserCans(user);
             const cansForDay = allCans.filter((can: { assignedDay: any; }) => can.assignedDay.toLowerCase() === date.toLowerCase());
             await addToCache(`${user?._id}-${date}-cans`, cansForDay);
