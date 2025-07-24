@@ -261,18 +261,6 @@ export const acceptTransfer = async (id: string, userId: string) => {
     }
 }
 
-
-export const getNumberOfNotifications = async () => {
-    try {
-        // When can maintenance is implemented this will be added here ofc
-        const numberOfTransferRequests = await getTransferRequests();
-        return Object.keys(numberOfTransferRequests).length || 0
-    } catch (error) {
-        console.error("The error happened in get number of notifciations: ", error);
-    }
-}
-
-
 export const updateCansDay = async (originalDay: string, newDay: string, cans: Record<string, any>, userId: string) => {
     try {
         const storedToken = await AsyncStorage.getItem('token');
@@ -295,3 +283,66 @@ export const updateCansDay = async (originalDay: string, newDay: string, cans: R
         console.error("There was a problem updating cans: ", error);
     }
 }
+
+
+export const getServiceNotifications = async () => {
+    try {
+        const user = await getFromCache("user");
+        const response = await fetch(`http://canroute.onrender.com/api/v1/can-notification/${user._id}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        const result = await response.json();
+        if (!result.success) {
+            throw new Error(result.error);
+        }
+        return result.data
+    } catch (error) {
+        console.error("The error happened in get number of notifciations: ", error);
+    }
+}
+
+export const getNumberServiceNotifications = async () => {
+    const serviceNotifications = await getServiceNotifications();
+    return Array.isArray(serviceNotifications) ? serviceNotifications.length : 0;
+};
+
+
+export const getNumberOfNotifications = async () => {
+    try {
+        const numberOfTransferRequests = await getTransferRequests();
+        const serviceNotifications = await getServiceNotifications();
+
+        const transferCount = Object.keys(numberOfTransferRequests || {}).length;
+        const serviceCount = Array.isArray(serviceNotifications) ? serviceNotifications.length : 0;
+
+        return transferCount + serviceCount;
+    } catch (error) {
+        console.error("The error happened in get number of notifications: ", error);
+        return 0;
+    }
+};
+
+
+
+export const getCanById = async (canId: string) => {
+    const response = await fetch(`https://canroute.onrender.com/api/v1/cans/${canId}`);
+    const result = await response.json();
+    if (!result.success) throw new Error(result.error);
+    return result.data;
+};
+
+
+export const deleteServiceNotification = async (notificationId: string) => {
+    const response = await fetch(`https://canroute.onrender.com/api/v1/can-notification/${notificationId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    });
+    const result = await response.json();
+    if (!result.success) throw new Error(result.error);
+    return result.data;
+};

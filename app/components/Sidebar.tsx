@@ -26,7 +26,6 @@ const Sidebar = ({ setShowSideBar }: { setShowSideBar: (val: boolean) => void })
         { label: 'Manage Cans', icon: 'construct-outline', path: "manageCans" },
         { label: 'View All Cans', icon: 'eye-outline', path: "viewAllCans" },
         { label: 'Notifications', icon: 'notifications-outline', path: "notifications" },
-        { label: 'Service History', icon: 'time-outline', path: "service-history" },
     ];
 
 

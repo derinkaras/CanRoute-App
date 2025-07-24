@@ -12,6 +12,7 @@ import smallCheck from "../assets/icons/check-solid.png"
 import calendar from "../assets/icons/calendar-days-solid.png"
 import chevronDown from "../assets/icons/chevron-down-solid.png"
 import send from "../assets/icons/paper-plane-solid.png"
+import qrcode from "../assets/icons/qrcode-solid-full.png"
 const icons = {
     bars,
     user,
@@ -26,7 +27,8 @@ const icons = {
     smallCheck,
     calendar,
     chevronDown,
-    send
+    send,
+    qrcode
 }
 
 export default icons

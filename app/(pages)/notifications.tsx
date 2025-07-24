@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     Text,
@@ -11,22 +11,29 @@ import Sidebar from '@/app/components/Sidebar';
 import * as Haptics from 'expo-haptics';
 import icons from '@/app/constants/icons';
 import useFetch from '@/hooks/useFetch';
-import {acceptTransfer, deleteTransfer, getTransferRequests} from '@/services/api';
-import {getStatusColor} from "@/services/utils";
+import { acceptTransfer, deleteTransfer, getTransferRequests, getServiceNotifications } from '@/services/api';
+import { getStatusColor } from "@/services/utils";
 import CanModal from "@/app/components/CanModal";
-import {useAuth} from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import TransferModal from "@/app/components/TransferModal";
 import Toast from "react-native-toast-message";
+import NotificationModal from "@/app/components/NotificationModal";
+
+
+
 
 const Notifications = () => {
     const [showSidebar, setShowSidebar] = useState(false);
     const [activeTab, setActiveTab] = useState<'transfer' | 'maintenance'>('transfer');
-    const [expandedRequestId, setExpandedRequestId] = useState(""); // This is also the id of the specific transfer
+    const [expandedRequestId, setExpandedRequestId] = useState("");
     const [currentCan, setCurrentCan] = useState({});
     const [showModal, setShowModal] = useState(false);
-    const {user} = useAuth()
+    const { user } = useAuth();
 
-    // @ts-ignore
+    const [selectedNotification, setSelectedNotification] = useState(null);
+    const [showNotificationModal, setShowNotificationModal] = useState(false);
+
+
     const {
         data: transferData,
         isLoading: transferLoading,
@@ -34,24 +41,27 @@ const Notifications = () => {
         refetch: refetchTransfer,
     } = useFetch(() => getTransferRequests());
 
+    const {
+        data: serviceData,
+        isLoading: serviceLoading,
+        error: serviceError,
+        refetch: refetchService,
+    } = useFetch(() => getServiceNotifications());
+
     const handleTabSwitch = async (tab: 'transfer' | 'maintenance') => {
         setActiveTab(tab);
         if (tab === 'transfer') await refetchTransfer();
-        // Add logic for notifications here later
+        else await refetchService();
     };
 
     useEffect(() => {
-        const fetch = async () => {
-            await refetchTransfer()
-        }
-        if(user) {
-            fetch()
+        if (user) {
+            refetchTransfer();
         }
     }, []);
 
     return (
         <View className="flex-1 bg-lightBlue">
-            {/* Sidebar */}
             {showSidebar && <Sidebar setShowSideBar={setShowSidebar} />}
 
             {/* Header */}
@@ -91,39 +101,30 @@ const Notifications = () => {
                 </TouchableOpacity>
             </View>
 
-            <TransferModal
-                showModal={showModal}
-                setShowModal={setShowModal}
-                can={currentCan}
-                user={user}
+            <TransferModal showModal={showModal} setShowModal={setShowModal} can={currentCan} user={user} />
+            <NotificationModal
+                showModal={showNotificationModal}
+                setShowModal={setShowNotificationModal}
+                notification={selectedNotification}
+                refetchService={refetchService}
             />
 
             {/* Content */}
             <View className="mx-5 mt-6 flex-1">
                 {activeTab === 'transfer' ? (
                     transferLoading ? (
-                        <View className="flex-1 justify-center items-center">
-                            <ActivityIndicator size="large" color="#007bff" />
-                        </View>
+                        <ActivityIndicator className="mt-10" size="large" color="#007bff" />
+                    ) : transferData?.length === 0 ? (
+                        <Text className="text-white font-semibold text-xl text-center mt-20">No notifications</Text>
                     ) : (
-                        transferData?.length === 0 ? (
-                            <View className="flex-1 items-center justify-center">
-                                <Text className="text-white font-semibold text-xl">
-                                    No notifications
-                                </Text>
-                            </View>
-                        ) : (
                         <FlatList
                             data={transferData}
                             keyExtractor={(item) => item._id}
                             showsVerticalScrollIndicator={false}
                             renderItem={({ item }) => (
                                 <TouchableOpacity
-                                    onPress={() => {
-                                        setExpandedRequestId(
-                                            expandedRequestId === item._id ? null : item._id
-                                        )
-                                    }
+                                    onPress={() =>
+                                        setExpandedRequestId(expandedRequestId === item._id ? null : item._id)
                                     }
                                     className="bg-darkBlue rounded-2xl p-4 mb-4"
                                 >
@@ -136,7 +137,7 @@ const Notifications = () => {
                                         </Text>
                                     </View>
 
-                                    {expandedRequestId === item._id && item.cans ? (
+                                    {expandedRequestId === item._id && item.cans && (
                                         <FlatList
                                             data={Object.entries(item.cans)}
                                             keyExtractor={([canId]) => canId}
@@ -146,7 +147,6 @@ const Notifications = () => {
                                                 return (
                                                     <TouchableOpacity
                                                         onPress={() => {
-                                                            // @ts-ignore
                                                             setCurrentCan(canData);
                                                             setShowModal(true);
                                                         }}
@@ -156,7 +156,6 @@ const Notifications = () => {
                                                         <View className="w-full bg-lightBlue rounded-2xl flex-row items-center justify-between px-4 py-3 shadow-sm shadow-black/20 mb-4">
                                                             <View className="flex-row items-center gap-3">
                                                                 <Image
-
                                                                     source={icons.trash}
                                                                     tintColor="white"
                                                                     className="size-6"
@@ -176,41 +175,75 @@ const Notifications = () => {
                                                         className="bg-green-600 rounded-2xl px-4 py-2"
                                                         onPress={async () => {
                                                             if (user?._id && expandedRequestId) {
-                                                                await acceptTransfer(expandedRequestId, user._id)
-                                                                await refetchTransfer()
+                                                                await acceptTransfer(expandedRequestId, user._id);
+                                                                await refetchTransfer();
                                                                 Toast.show({
-                                                                    type: "success",
-                                                                    text1: "Successfully  Accepted Transfer",
-                                                                    text2: "The respective cans were added to the resepective days route"
-                                                                })
+                                                                    type: 'success',
+                                                                    text1: 'Accepted Transfer',
+                                                                    text2: 'Cans were added to the day\'s route'
+                                                                });
                                                             }
                                                         }}
                                                     >
-                                                        <Text className="text-white font-semibold text-xl text-center">Accept</Text>
+                                                        <Text className="text-white font-semibold text-xl text-center">
+                                                            Accept
+                                                        </Text>
                                                     </TouchableOpacity>
                                                     <TouchableOpacity
                                                         className="bg-red-500 rounded-2xl px-4 py-2"
-                                                        onPress={async ()=> {
-                                                            await deleteTransfer(expandedRequestId)
-                                                            await refetchTransfer()
+                                                        onPress={async () => {
+                                                            await deleteTransfer(expandedRequestId);
+                                                            await refetchTransfer();
                                                         }}
                                                     >
-                                                        <Text className="text-white font-semibold text-xl text-center">Decline</Text>
+                                                        <Text className="text-white font-semibold text-xl text-center">
+                                                            Decline
+                                                        </Text>
                                                     </TouchableOpacity>
                                                 </View>
                                             }
                                         />
-                                    ) : null}
-
+                                    )}
                                 </TouchableOpacity>
                             )}
                         />
-                        )
                     )
+                ) : serviceLoading ? (
+                    <ActivityIndicator className="mt-10" size="large" color="#007bff" />
+                ) : serviceData?.length === 0 ? (
+                    <Text className="text-white font-semibold text-xl text-center mt-20">
+                        No maintenance reports
+                    </Text>
                 ) : (
-                    <View className="items-center justify-center flex-1">
-                        <Text className="text-white text-lg italic">Can Maintenance coming soon...</Text>
-                    </View>
+                    <FlatList
+                        data={serviceData}
+                        keyExtractor={(item) => item._id}
+                        showsVerticalScrollIndicator={false}
+                        renderItem={({ item }) => (
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setSelectedNotification(item);
+                                    setShowNotificationModal(true);
+                                }}
+                                className="bg-darkBlue rounded-2xl p-4 mb-4"
+                            >
+                                <Text className="text-white font-semibold mb-2">Message:</Text>
+                                <Text className="text-gray-300 italic">{item.message}</Text>
+
+                                {item.photoUrl && (
+                                    <Image
+                                        source={{ uri: `https://canroute.onrender.com${item.photoUrl}` }}
+                                        className="w-full h-40 mt-3 rounded-lg"
+                                        resizeMode="cover"
+                                    />
+                                )}
+
+                                <Text className="text-sm text-gray-400 mt-3">
+                                    Submitted: {new Date(item.createdAt).toLocaleString()}
+                                </Text>
+                            </TouchableOpacity>
+                        )}
+                    />
                 )}
             </View>
         </View>
