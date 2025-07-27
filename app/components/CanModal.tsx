@@ -39,6 +39,9 @@ const CanModal = ({
 
     useEffect(() => {
         setShowQrModal(false);
+        if (can) {
+            console.log("This is the can qr code link: ", can.qrCode)
+        }
     }, [can]);
 
 
