@@ -90,42 +90,66 @@ Scan the QR code with Expo Go to launch the app on your device.
 
 ---
 
-## 📡 API Endpoints (Sample)
+## 📡 API Endpoints (Based on Uploaded Routes)
 
+### 🔐 **Auth Routes (`auth.routes.js`)**
 | Method | Endpoint | Description |
 |---------|-----------|-------------|
-| `POST` | `/api/auth/register` | Register a new user |
-| `POST` | `/api/auth/login` | Login and get JWT token |
-| `GET` | `/api/cans` | Fetch all garbage cans |
-| `GET` | `/api/routes/:id` | Get route details |
-| `POST` | `/api/logs` | Create service log entry |
-| `POST` | `/api/alerts` | Submit a resident or worker alert |
+| `POST` | `/api/auth/register` | Register new user |
+| `POST` | `/api/auth/login` | Authenticate user and return JWT |
+| `GET` | `/api/auth/users` | Get all users (Admin only) |
+
+### 🗑️ **Can Routes (`can.routes.js`)**
+| Method | Endpoint | Description |
+|---------|-----------|-------------|
+| `GET` | `/api/cans` | Get all cans |
+| `GET` | `/api/cans/:id` | Get specific can |
+| `POST` | `/api/cans` | Add a new can |
+| `PATCH` | `/api/cans/:id` | Update can info |
+| `DELETE` | `/api/cans/:id` | Delete can |
+
+### 🚨 **Can Notifications (`canNotification.routes.js`)**
+| Method | Endpoint | Description |
+|---------|-----------|-------------|
+| `GET` | `/api/notifications` | Fetch all can notifications |
+| `POST` | `/api/notifications` | Create new notification |
+| `PATCH` | `/api/notifications/:id` | Update notification status |
+| `DELETE` | `/api/notifications/:id` | Remove notification |
+
+### 💰 **Payroll Routes (`payroll.routes.js`)**
+| Method | Endpoint | Description |
+|---------|-----------|-------------|
+| `GET` | `/api/payroll` | Get payroll logs |
+| `POST` | `/api/payroll` | Create new payroll entry |
+| `PATCH` | `/api/payroll/:id` | Update payroll entry |
+| `DELETE` | `/api/payroll/:id` | Delete payroll entry |
+
+### 🧾 **Service Log Routes (`serviceLog.routes.js`)**
+| Method | Endpoint | Description |
+|---------|-----------|-------------|
+| `GET` | `/api/service-logs` | Fetch all service logs |
+| `POST` | `/api/service-logs` | Create a new service log |
+| `PATCH` | `/api/service-logs/:id` | Update existing log |
+| `DELETE` | `/api/service-logs/:id` | Delete service log |
+
+### 🔄 **Transfer Routes (`transfer.routes.js`)**
+| Method | Endpoint | Description |
+|---------|-----------|-------------|
+| `GET` | `/api/transfers` | Fetch all transfers |
+| `POST` | `/api/transfers` | Create new transfer |
+| `PATCH` | `/api/transfers/:id` | Update transfer |
+| `DELETE` | `/api/transfers/:id` | Delete transfer |
 
 ---
 
-## 🧠 Data Models (Simplified)
+## 🧠 Mongoose Models (Overview)
 
-```js
-User {
-  _id, name, role, email, passwordHash, assignedRouteIds[], createdAt
-}
-
-Can {
-  _id, qr_uid, location: { lat, lng }, type, status, lastServiced, photoUrl
-}
-
-Route {
-  _id, name, date, assignedTo, stops: [CanIds], completed
-}
-
-ServiceLog {
-  _id, canId, userId, action, note, photos[], timestamp
-}
-
-Alert {
-  _id, canId, source: ['resident','worker'], severity, description, status
-}
-```
+- **User Model:** Worker/supervisor data, auth credentials, assigned routes.
+- **Can Model:** Represents each physical garbage bin with geo-location and status.
+- **ServiceLog Model:** History of can servicing actions (serviced, skipped, noted).
+- **CanNotification Model:** Alerts or QR-based notifications from residents.
+- **Transfer Model:** Records of can or route reassignment between workers.
+- **Payroll Model:** Stores worker payroll info and payment records.
 
 ---
 
@@ -133,16 +157,6 @@ Alert {
 
 🎥 **[Watch the demo here](https://your-demo-video-link.com)**  
 *(Replace with your actual link once uploaded — YouTube or Loom recommended)*
-
----
-
-## 🧑‍💻 Tech Stack Summary
-
-- **Frontend:** React Native (Expo), NativeWind (Tailwind CSS for RN)  
-- **Backend:** Node.js, Express.js, Mongoose, JWT Auth  
-- **Database:** MongoDB Atlas  
-- **Hosting:** Render (API), Expo (App)  
-- **Utilities:** Axios, dotenv, React Navigation, QRCode Scanner, Firebase Push Notifications
 
 ---
 
@@ -158,7 +172,7 @@ CanRouteApp/
 │   └── App.js
 │
 ├── server/                 # Express backend
-│   ├── models/             # Mongoose models
+│   ├── models/             # Mongoose models (can, user, etc.)
 │   ├── routes/             # Express route handlers
 │   ├── controllers/        # Business logic
 │   ├── middleware/         # JWT auth, error handling
