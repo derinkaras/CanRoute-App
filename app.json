@@ -8,8 +8,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true,
-      "bundler": "metro"
+      "supportsTablet": true
     },
     "android": {
       "edgeToEdgeEnabled": true
