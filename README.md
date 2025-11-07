@@ -7,7 +7,7 @@ React Native (Expo) app for CanRoute — a field-operations platform that stream
 ## 🎥 Product Demo
 Click the picture to open up the video
 
-[![Watch the demo](https://img.youtube.com/vi/7eBLi3tnBYw/hqdefault.jpg)](https://www.youtube.com/watch?v=7eBLi3tnBYw)
+[![CanRouteApp Demo](https://i.imgur.com/3C4h6UO.png)](https://www.youtube.com/watch?v=7eBLi3tnBYw)
 
 ---
 
