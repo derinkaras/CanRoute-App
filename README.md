@@ -4,6 +4,12 @@ React Native (Expo) app for CanRoute — a field-operations platform that stream
 
 ---
 
+## 🎥 Product Demo
+
+[![Watch the demo](https://img.youtube.com/vi/7eBLi3tnBYw/hqdefault.jpg)](https://www.youtube.com/watch?v=7eBLi3tnBYw)
+
+---
+
 ## Repositories
 
 - Mobile App (this repo): https://github.com/derinkaras/CanRoute-App/tree/main
@@ -143,4 +149,3 @@ MIT — see repository license.
 
 Created by Derin Karas
 - API: https://github.com/derinkaras/CanRoute-API
-
