@@ -106,16 +106,6 @@ export default api;
 
 ---
 
-## Core Screens
-
-- Home: progress ring, next stop, start/end shift
-- Route: list + map view, stop details
-- Can Detail: scan QR, service/skip, attach photos/notes
-- Alerts: resident/worker alerts, acknowledge + action
-- Profile: sign-out, app version
-
----
-
 ## Auth
 
 - Uses JWT from the API
